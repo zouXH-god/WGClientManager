@@ -1,0 +1,18 @@
+[project]
+name = "WGClientManager"
+version = "0.1.0"
+description = "WireGuard web manage"
+authors = [
+    {name = "shiran",email = "2488252513@qq.com"},
+]
+dependencies = [
+    "flask>=3.0.3",
+    "qrcode>=7.4.2",
+]
+requires-python = "==3.11.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false

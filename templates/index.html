@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WireGuard 管理面板</title>
+
+    <style>
+        @font-face {
+          font-family: 'iconfont';
+          src: url('/static/font_xut78wxc62/iconfont.ttf?t=1726935970899') format('truetype');
+        }
+        .peer_card_box{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .peer_card{
+            width: 500px;
+            height: 200px;
+            padding: 8px;
+            background-color: #80a4ac;
+            border-radius: 0 20px 0 20px;
+            box-shadow: #6db7c0 0px 0px 10px;
+            color: #fff;
+            margin: 10px;
+            position: relative;
+        }
+        .peer_card.active{
+            background-color: #b9c06d;
+        }
+
+        .peer_name{
+            font-size: 23px;
+            margin: 6px 0;
+        }
+        .info{
+            font-size: 14px;
+            color: #f0ffe0;
+            display: flex;
+        }
+        .info_title{
+            color: #f2f2f2;
+            font-weight: 700;
+        }
+        .buttons{
+            display: flex;
+        }
+        .buttons .button{
+            margin: 10px 10px;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            color: #fff;
+        }
+        .buttons .button:hover{
+            background-color: #0003;
+        }
+        .ico{
+            font-family: iconfont;
+        }
+        .add_client_box{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #00000066;
+        }
+        .add_client{
+            width: 500px;
+            height: 200px;
+            padding: 8px;
+            background-color: #c6a1a1;
+            border-radius: 20px;
+            box-shadow: #6db7c0 0px 0px 10px;
+            color: #fff;
+            margin: 10px;
+            position: fixed;
+            top: 50px;
+            left: 50%;
+            margin-left: -250px;
+        }
+        .add_client input{
+            border: none;
+            background-color: #86989B66;
+            border-bottom: 1px solid #fff;
+            height: 18px;
+            padding: 3px;
+            border-radius: 5px;
+            margin: 5px 0;
+            width: 300px;
+        }
+        .qrcode{
+            width: 160px;
+            height: 160px;
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            border-radius: 20px;
+        }
+
+        .type{
+            position: absolute;
+            top: -12px;
+            left: 3px;
+        }
+        .type div{
+            padding: 3px 6px;
+            border-radius: 20px;
+            color: #fff;
+        }
+        .type .online{
+            background-color: #5cb756;
+        }
+        .type .offline{
+            background-color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="peer_card_box">
+    <div class="peer_card active">
+        <h2 class="peer_name">- 服务端管理 </h2>
+        <div class="info"><div class="info_title">服务端名称：</div>
+            {{ clients.interface.name }}
+        </div>
+        <div class="info"><div class="info_title">服务端地址：</div>
+            {{ clients.interface.host }}:{{clients.interface.listening_port}}
+        </div>
+        <div class="info"><div class="info_title">服务端公钥：</div>
+            {{ clients.interface.public_key }}
+        </div>
+
+        <div class="buttons">
+            <div class="button ico" onclick="target_client_box();">&#xe623; 新增</div>
+            <div class="button ico" onclick="window.location.reload();">&#xe641; 刷新</div>
+            <div class="button ico">&#xe621; 重启</div>
+        </div>
+    </div>
+    {% for peer in clients.peers %}
+        <div class="peer_card client" ip="{{ peer.allowed_ips }}">
+            <h2 class="peer_name">- {{ peer.note }} </h2>
+            <div class="info"><div class="info_title">分配地址：</div>{{ peer.allowed_ips }}</div>
+            <div class="info"><div class="info_title">来源地址：</div>{{ peer.endpoint }}</div>
+            <div class="info"><div class="info_title">客户端公钥：</div>{{ peer.public_key }}</div>
+            <div class="info"><div class="info_title">发生流量：</div>{{ peer.transfer_rx }}</div>
+            <div class="info"><div class="info_title">接收流量：</div>{{ peer.transfer_tx }}</div>
+            <div class="buttons">
+                <div class="button ico" onclick="delete_client(`{{ peer.public_key }}`)">&#xe622; 删除</div>
+                <div class="button ico" onclick="check_ip(`{{ peer.allowed_ips }}`, this.parentNode.parentNode) ">&#xe641; 刷新</div>
+                <div class="button ico" onclick="copyText(`{{ peer.wg_conf }}`)">&#xe623; 复制</div>
+                <div class="button ico" onclick="show_qrcode(`{{ peer.qr_code }}`)">&#xeaf1; 显示二维码</div>
+            </div>
+            <div class="type">
+                <div class="online">已连接</div>
+                <div class="offline" style="display: none;">离线</div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="add_client_box" style="display: none;">
+    <div class="add_client">
+        <h2 class="peer_name">- 名称：<input id="note" type="text"></h2>
+        <div class="info"><div class="info_title">分配地址：</div><input id="allowed_ips" type="text"></div>
+        <div class="info"><div class="info_title">客户端公钥：</div><input id="public_key" type="text"></div>
+        <div class="info"><div class="info_title">客户端私钥：</div><input id="private_key" type="text"></div>
+        <div class="buttons">
+            <div class="button ico" onclick="target_client_box();">&#xe621; 关闭</div>
+            <div class="button ico" onclick="create_client();">&#xe635; 创建</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function check_ip(ip, item){
+        if (ip.includes('/')){
+            ip = ip.split('/')[0];
+        }
+        fetch('/ping/'+ip).then(res => res.json()).then(data => {
+            if (data.result){
+                item.querySelector('.type .online').style.display = 'block';
+                item.querySelector('.type .offline').style.display = 'none';
+            }else{
+                item.querySelector('.type .online').style.display = 'none';
+                item.querySelector('.type .offline').style.display = 'block';
+            }
+        })
+    }
+
+    // 遍历 .peer_card 元素
+    document.querySelectorAll('.peer_card.client').forEach(item => {
+        // 发送请求 /ping/<ip>
+        let ip = item.getAttribute('ip');
+        check_ip(ip, item)
+    })
+
+    function show_qrcode(qrcode){
+        // 删除所有.qrcode元素
+        document.querySelectorAll('.qrcode').forEach(item => item.remove());
+        // 给当前父级的 .peer_card 添加 img.qrcode元素
+        event.target.parentNode.parentNode.innerHTML += '<img class="qrcode" src="'+qrcode+'" alt="">';
+    }
+
+    function target_client_box(){
+        // 发生请求到 /generate_keypair 生成密钥
+        fetch('/generate_keypair').then(res => res.json()).then(data => {
+            document.querySelector('#public_key').value = data[0];
+            document.querySelector('#private_key').value = data[1];
+        })
+        if(document.querySelector('.add_client_box').style.display == 'none'){
+            document.querySelector('.add_client_box').style.display = 'block';
+        }else{
+            document.querySelector('.add_client_box').style.display = 'none';
+        }
+    }
+
+    function  create_client(){
+        let note = document.querySelector('#note').value;
+        let allowed_ips = document.querySelector('#allowed_ips').value;
+        let public_key = document.querySelector('#public_key').value;
+        let private_key = document.querySelector('#private_key').value;
+        let encoded_public_key = encodeURIComponent(public_key);
+        let encoded_private_key = encodeURIComponent(private_key);
+        let data = {
+            note: note,
+            AllowedIP: allowed_ips,
+            PublicKey: encoded_public_key,
+            PrivateKey: encoded_private_key
+        }
+        let url = "/add_client?"
+        for (let key in data){
+            url += '&'+key+'='+data[key];
+        }
+        fetch(url, {
+            method: 'GET',
+        }).then(data => {
+            console.log(data);
+        })
+    }
+
+    function delete_client(public_key){
+        // 对public_key进行URL安全的编码
+        let encoded_public_key = encodeURIComponent(public_key);
+        let url = `/del_client?PublicKey=${encoded_public_key}`;
+        fetch(url, {
+            method: 'GET',
+        }).then(data => {
+            console.log(data);
+        })
+    }
+
+    async function copyText(text){
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (err) {
+            console.error('无法复制到剪贴板', err);
+            // 创建一个文本框
+            var textarea = document.createElement('textarea')
+            // 将文本框的值设置为要复制的内容
+            textarea.value = text
+            // 将文本框添加到页面中
+            document.body.appendChild(textarea)
+            // 选中文本框中的内容
+            textarea.select()
+            // 执行复制操作
+            document.execCommand('copy')
+            // 删除文本框
+            document.body.removeChild(textarea)
+        }
+    }
+
+</script>
+</body>
+</html>
