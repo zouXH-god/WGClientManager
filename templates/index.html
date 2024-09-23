@@ -207,8 +207,8 @@
     function target_client_box(){
         // 发生请求到 /generate_keypair 生成密钥
         fetch('/generate_keypair').then(res => res.json()).then(data => {
-            document.querySelector('#public_key').value = data[0];
-            document.querySelector('#private_key').value = data[1];
+            document.querySelector('#public_key').value = data[1];
+            document.querySelector('#private_key').value = data[0];
         })
         if(document.querySelector('.add_client_box').style.display == 'none'){
             document.querySelector('.add_client_box').style.display = 'block';
