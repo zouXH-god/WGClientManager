@@ -1,3 +1,5 @@
+import ipaddress
+
 from flask import Flask, jsonify, request, render_template, redirect, url_for, make_response
 
 import setting
@@ -34,6 +36,10 @@ def login():
 @app.route('/', methods=['GET'])
 def index():
     clients = get_all_clients_info()
+    # 排序
+    clients["peers"] = sorted(clients["peers"], key=lambda x: ipaddress.ip_network(x['allowed_ips']))
+    for client in clients["peers"]:
+        print(client["allowed_ips"])
     return render_template("index.html", clients=clients)
 
 
