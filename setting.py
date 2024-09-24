@@ -1,3 +1,6 @@
 wg_name = "wg0"
 wg_config_path = "/etc/wireguard/wg0.conf"
 wg_host = ""
+Token = "111111111111"
+user_name = "admin"
+user_password = "admin"
