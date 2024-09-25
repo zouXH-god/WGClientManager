@@ -11,7 +11,7 @@ from setting import wg_name, wg_config_path, wg_host
 def check_ping(ip):
     try:
         # 使用 subprocess 运行 ping 命令，ping 4 次
-        output = subprocess.run(['ping', '-c', '4', ip], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        output = subprocess.run(['ping', '-c', '2', ip], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # 检查 ping 命令的退出状态码，0表示成功
         if output.returncode == 0:
@@ -226,6 +226,7 @@ def generate_wg_keypair():
 
 
 def mk_wg_config(priv_key, address, pub_key, allowed_ips, listening_port):
+    AllowedIPs = re.sub("\.\d+/", ".0/", allowed_ips)
     wg_config = f"""
 [Interface]
 PrivateKey = {priv_key}
@@ -235,7 +236,7 @@ MTU = 1420
 
 [Peer]
 PublicKey = {pub_key}
-AllowedIPs = {allowed_ips}
+AllowedIPs = {AllowedIPs}
 Endpoint = {wg_host}:{listening_port}
 PersistentKeepalive = 25
 """
