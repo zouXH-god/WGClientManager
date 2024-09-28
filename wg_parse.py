@@ -198,7 +198,7 @@ def get_all_clients_info() -> dict:
         if not in_client:
             client_peer = {
                 "public_key": conf_peer.get("PublicKey"),
-                "allowed_ips": conf_peer.get("AllowedIP"),
+                "allowed_ips": conf_peer.get("AllowedIP") if conf_peer.get("AllowedIP") else "0.0.0.0",
                 "note": conf_peer.get("note")
             }
             clients["peers"].append(client_peer)
