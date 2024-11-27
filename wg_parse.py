@@ -115,7 +115,7 @@ def parse_wg_conf(conf_path: str = wg_config_path) -> dict:
             if line_type == "peer" and peer_data:
                 data['peer'].append(peer_data)
 
-            if conf_content[index - 1].startswith("#"):
+            if conf_content[index - 1].startswith("#") and "PrivateKey" not in conf_content[index - 1]:
                 peer_note = conf_content[index - 1].strip()
                 peer_data = {"note": peer_note}
             else:
