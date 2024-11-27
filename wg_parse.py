@@ -129,7 +129,7 @@ def parse_wg_conf(conf_path: str = wg_config_path) -> dict:
             line_data = line.split("=", 1)
             if len(line_data) >= 2:
                 if line_data[0].strip() == "#PrivateKey":
-                    peer_data["PrivateKey"] = line_data[1].split("#")[1].strip()
+                    peer_data["PrivateKey"] = line_data[1].split("#")[0].strip()
                 else:
                     peer_data[line_data[0].strip()] = line_data[1].split("#")[0].strip()
     if line_type == "peer" and peer_data:
