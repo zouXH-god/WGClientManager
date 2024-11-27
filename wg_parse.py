@@ -128,7 +128,10 @@ def parse_wg_conf(conf_path: str = wg_config_path) -> dict:
         elif line_type == "peer":
             line_data = line.split("=", 1)
             if len(line_data) >= 2:
-                peer_data[line_data[0].strip()] = line_data[1].split("#")[0].strip()
+                if line_data[0].strip() == "#PrivateKey":
+                    peer_data["PrivateKey"] = line_data[1].split("#")[1].strip()
+                else:
+                    peer_data[line_data[0].strip()] = line_data[1].split("#")[0].strip()
     if line_type == "peer" and peer_data:
         data['peer'].append(peer_data)
     return data
@@ -150,7 +153,10 @@ def save_wg_conf(conf_path: str = wg_config_path, conf_data: dict = None):
                 del peer['note']
             fp.write("[Peer]\n")
             for key, value in peer.items():
-                fp.write(f"{key} = {value}\n")
+                if key == "PrivateKey":
+                    fp.write(f"#{key} = {value}\n")
+                else:
+                    fp.write(f"{key} = {value}\n")
             fp.write("\n")
 
 
