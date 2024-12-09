@@ -165,7 +165,7 @@ def add_client_to_conf(client_pub_key: str, client_ip: str, note: str = None, Pr
     conf_data = parse_wg_conf()
     peer_data = {
         "PublicKey": client_pub_key,
-        "AllowedIPs": client_ip if "/" in client_ip else f"{client_ip}/32",
+        "AllowedIPs": client_ip if "/" in client_ip else f"{client_ip}/24",
     }
     if note:
         peer_data["note"] = note
