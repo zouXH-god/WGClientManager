@@ -71,7 +71,7 @@ def add_client():
     # 判断 AllowedIP 是否重复
     if (
             get_allowed_ips(AllowedIP) in [peer.get("AllowedIPs") for peer in wg_conf.get("peer")] or
-            get_allowed_ips(AllowedIP) in [peer.get("allowed_ips") for peer in wg_output.get("peer")]
+            get_allowed_ips(AllowedIP) in [peer.get("allowed_ips") for peer in wg_output.get("peers")]
     ):
         return 500, jsonify({
             "result": "error",
