@@ -4,7 +4,7 @@ from flask import Flask, jsonify, request, render_template, redirect, url_for, m
 
 import setting
 from wg_parse import parse_wg_output, parse_wg_conf, save_wg_conf, check_ping, cmd_add_client, add_client_to_conf, \
-    cmd_del_client, get_all_clients_info, generate_wg_keypair, del_client_from_conf
+    cmd_del_client, get_all_clients_info, generate_wg_keypair, del_client_from_conf, get_allowed_ips
 
 app = Flask(__name__)
 
@@ -65,13 +65,25 @@ def add_client():
     note = request.args.get('note')
     if not PublicKey or not PrivateKey:
         PublicKey, PrivateKey = generate_wg_keypair()
+    wg_conf = parse_wg_conf()
+    wg_output = parse_wg_output()
+
+    # 判断 AllowedIP 是否重复
+    if (
+            get_allowed_ips(AllowedIP) in [peer.get("AllowedIPs") for peer in wg_conf.get("peer")] or
+            get_allowed_ips(AllowedIP) in [peer.get("allowed_ips") for peer in wg_output.get("peer")]
+    ):
+        return 500, jsonify({
+            "result": "error",
+            "message": "AllowedIP 重复"
+        })
 
     # 判断 PublicKey 是否存在客户端中，不存在则添加
-    if PublicKey not in [peer.get("PublicKey") for peer in parse_wg_conf().get("peer")]:
+    if PublicKey not in [peer.get("PublicKey") for peer in wg_conf.get("peer")]:
         add_client_to_conf(PublicKey, AllowedIP, note, PrivateKey=PrivateKey)
-    if PublicKey not in [peer.get("public_key") for peer in parse_wg_output().get("peers")]:
+    if PublicKey not in [peer.get("public_key") for peer in wg_output.get("peers")]:
         cmd_add_client(PublicKey, AllowedIP)
-    return "ok"
+    return 200, "ok"
 
 
 @app.route('/del_client', methods=['GET'])

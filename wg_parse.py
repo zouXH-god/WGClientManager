@@ -160,12 +160,16 @@ def save_wg_conf(conf_path: str = wg_config_path, conf_data: dict = None):
             fp.write("\n")
 
 
+def get_allowed_ips(client_ip: str) -> str:
+    return client_ip if "/" in client_ip else f"{client_ip}/24"
+
+
 # 配置文件添加客户端
 def add_client_to_conf(client_pub_key: str, client_ip: str, note: str = None, PrivateKey: str = None):
     conf_data = parse_wg_conf()
     peer_data = {
         "PublicKey": client_pub_key,
-        "AllowedIPs": client_ip if "/" in client_ip else f"{client_ip}/24",
+        "AllowedIPs": get_allowed_ips(client_ip),
     }
     if note:
         peer_data["note"] = note
