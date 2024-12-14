@@ -73,7 +73,7 @@ def add_client():
             get_allowed_ips(AllowedIP) in [peer.get("AllowedIPs") for peer in wg_conf.get("peer")] or
             get_allowed_ips(AllowedIP) in [peer.get("allowed_ips") for peer in wg_output.get("peers")]
     ):
-        return 500, jsonify({
+        return jsonify({
             "result": "error",
             "message": "AllowedIP 重复"
         })
@@ -83,7 +83,7 @@ def add_client():
         add_client_to_conf(PublicKey, AllowedIP, note, PrivateKey=PrivateKey)
     if PublicKey not in [peer.get("public_key") for peer in wg_output.get("peers")]:
         cmd_add_client(PublicKey, AllowedIP)
-    return 200, "ok"
+    return "ok"
 
 
 @app.route('/del_client', methods=['GET'])
