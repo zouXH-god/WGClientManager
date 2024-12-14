@@ -4,6 +4,8 @@ import subprocess
 from io import BytesIO
 
 import qrcode
+
+import setting
 from setting import wg_name, wg_config_path, wg_host
 
 
@@ -50,6 +52,8 @@ def parse_wg_output() -> dict:
 
     for line in lines:
         line = line.strip()
+        if result['interface'].get('name') and result['interface'].get('name') != setting.wg_name:
+            continue
         if interface_match := interface_re.match(line):
             result['interface']['name'] = interface_match.group(1)
         elif public_key_match := public_key_re.match(line):
@@ -78,7 +82,7 @@ def parse_wg_output() -> dict:
     # 最后一个peer也要添加到peers列表中
     if current_peer:
         result['peers'].append(current_peer)
-
+    result['interface']["name"] = setting.wg_name
     return result
 
 
